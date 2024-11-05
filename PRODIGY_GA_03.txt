@@ -1,0 +1,56 @@
+import numpy as np
+import random
+
+def load_text(file_path):
+    with open(file_path, 'r') as f:
+        text = f.read()
+    return text
+
+def create_markov_chain(text, n=1, is_word_based=False):
+    markov_chain = {}
+    if is_word_based:
+        tokens = text.split()
+    else:
+        tokens = list(text)
+
+    for i in range(len(tokens) - n):
+        key = tuple(tokens[i:i + n])  
+        next_token = tokens[i + n]
+        if key not in markov_chain:
+            markov_chain[key] = []
+        markov_chain[key].append(next_token)
+
+    return markov_chain
+
+def generate_text(markov_chain, start, length=100):
+    current_state = tuple(start)
+    result = list(start)
+
+    for _ in range(length):
+        next_states = markov_chain.get(current_state, None)
+        if not next_states:
+            break  
+        next_token = random.choice(next_states)
+        result.append(next_token)
+        current_state = tuple(result[-len(current_state):]) 
+
+    return ' '.join(result) if isinstance(start, list) else ''.join(result)
+
+file_path = 'your_text_file.txt'  
+text = load_text(file_path)
+
+n = 2  
+is_word_based = False  
+
+markov_chain = create_markov_chain(text, n, is_word_based)
+
+start_string = "Once upon a time" if is_word_based else "Once upon"  
+generated_length = 100  
+
+if is_word_based:
+    start_words = start_string.split()[:n]
+    generated_text = generate_text(markov_chain, start_words, generated_length)
+else:
+    generated_text = generate_text(markov_chain, start_string, generated_length)
+
+print("Generated Text:\n", generated_text)
